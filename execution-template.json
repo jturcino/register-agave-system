@@ -1,0 +1,65 @@
+{
+  "id": "{SYSID}",
+  "name": "{SYSID} Execution",
+  "status": "UP",
+  "type": "EXECUTION",
+  "description": "{USERNAME}'s execution system on {HOST}",
+  "site": "{HOST}",
+  "default": false,
+  "maxSystemJobs": {MAX_SYS_JOBS},
+  "workDir": "{WORK}",
+  "scratchDir": "",
+  "login": {
+    "port": {PORT},
+    "protocol": "SSH",
+    "host": "{HOST}",
+    "proxy": null,
+    "auth": {
+      "type": "SSHKEYS",
+      "username": "{USERNAME}",
+      "publicKey":"{PUBKEY}",
+      "privateKey":"{PRIVKEY}"
+    },
+    "proxyTunnel": "NO"
+  },
+  "maxSystemJobsPerUser": {MAX_USER_SYS_JOBS},
+  "scheduler": "FORK",
+  "startupScript": null,
+  "available": true,
+  "environment": "",
+  "owner": "{USERNAME}",
+  "executionType": "{EXECUTION_TYPE}",
+  "globalDefault": false,
+  "queues": [
+    {
+      "maxJobs": 10,
+      "maxMemoryPerNode": 20,
+      "default": true,
+      "maxRequestedTime": "00:30:00",
+      "name": "default",
+      "description": "Default queue for {SYSID}",
+      "maxNodes": 1,
+      "maxProcessorsPerNode": {PROCESSORS},
+      "mappedName": null,
+      "maxUserJobs": 10,
+      "customDirectives": null
+    }
+  ],
+  "public": false,
+  "storage": {
+    "mirror": false,
+    "port": {PORT},
+    "homeDir": "{WORK}",
+    "protocol": "SFTP",
+    "host": "{HOST}",
+    "proxy": null,
+    "rootDir": "/",
+    "auth": {
+      "type": "SSHKEYS",
+      "username": "{USERNAME}",
+      "publicKey":"{PUBKEY}",
+      "privateKey":"{PRIVKEY}"
+    },
+    "proxyTunnel": "NO"
+  }
+}
