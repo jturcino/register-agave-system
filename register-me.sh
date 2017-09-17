@@ -12,6 +12,7 @@ max_sys_jobs="50"
 port="22"
 max_user_sys_jobs="50"
 execution_type="CLI"
+savedir="$HOME"
 HELP="
 This script creates an Agave execution system for the user on the current system. The JSON used to create the system is saved to the current directory. If not specified using command line arguments, the current username and hostname will be used to generate the system ID. Addtionally, ssh keys will be created for the systems if not given with command line arguments. Several options are also available as detailed in the description below, with default values in parentheses.
 
@@ -31,6 +32,7 @@ Options:
   --port			Port number (22)
   --max-user-sys-jobs		Maximum jobs allowed per user (50)
   --execution-type		Execution system type (CLI)
+  --savedir			Path to directory in which to save JSON (~)
 "
 
 # ARGPARSE
@@ -72,6 +74,9 @@ while [[ $# -gt 1 ]]; do
             shift ;;
         --execution-type) shift;
             execution_type="$1"
+            shift ;;
+        --savedir) shift;
+            savedir="$1"
             shift ;;
         *) echo $HELP
             exit 0
@@ -165,7 +170,7 @@ template=`echo ${template//\{MAX_USER_SYS_JOBS\}/$max_user_sys_jobs}`
 template=`echo ${template//\{EXECUTION_TYPE\}/$execution_type}`
 
 # SAVE TEMPLATE IN HOME DIR
-jsonfile="$sysid.json"
+jsonfile="$savedir/$sysid.json"
 echo $template >> $jsonfile
 echo "Saved JSON description to $jsonfile"
 
