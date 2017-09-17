@@ -155,7 +155,7 @@ if [ -z "$privkey" ] || [ -z "$pubkey" ]; then
     else
         echo "Fetching existing sshkeys for $sysid"
     fi
-    privkey=`cat $sshkeyfile | awk '{printf "%s\\n", $0}'`
+    privkey="$(cat $sshkeyfile | awk '{printf "%s\\n", $0}')"
     pubkey=`cat $sshkeyfile.pub`
 fi
 
