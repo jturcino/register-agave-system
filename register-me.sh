@@ -14,7 +14,12 @@ max_user_sys_jobs="50"
 execution_type="CLI"
 savedir="$HOME"
 HELP="
-This script creates an Agave execution system for the user on the current system. The JSON used to create the system is saved to the current directory. If not specified using command line arguments, the current username and hostname will be used to generate the system ID. Addtionally, ssh keys will be created for the systems if not given with command line arguments. Several options are also available as detailed in the description below, with default values in parentheses.
+This script creates an Agave execution system for the user on the current system. 
+The JSON used to create the system is saved to the current directory. If not 
+specified using command line arguments, the current username and hostname will be 
+used to generate the system ID. Addtionally, ssh keys will be created for the 
+systems if not given with command line arguments. Several options are also available 
+as detailed in the description below, with default values in parentheses.
 
 Usage: ./register-me.sh [OPTIONS]
 
