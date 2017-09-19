@@ -148,15 +148,16 @@ echo "Setting processor count to $processors"
 
 # get or make sshkeys
 if [ -z "$privkey" ] || [ -z "$pubkey" ]; then
-    sshkeyfile="$HOME/.ssh/$(echo $sysid | tr '-' '_')_sshkey"
+    sshkeyfile="$HOME/.ssh/agave_$(echo $sysid | tr '-' '_')"
     if ! [ -e "$sshkeyfile" ] || ! [ -e "$sshkeyfile.pub" ]; then
         echo "Generating sshkeys for $sysid"
-        ssh-keygen -q -f $sshkeyfile -N $sysid
+        ssh-keygen -q -f $sshkeyfile -N ""
     else
         echo "Fetching existing sshkeys for $sysid"
     fi
     privkey="$(cat $sshkeyfile | awk '{printf "%s\\n", $0}')"
-    pubkey=`cat $sshkeyfile.pub`
+    pubkey=`cat ${sshkeyfile}.pub`
+    cat ${sshkeyfile}.pub >> $HOME/.ssh/authorized_keys
 fi
 
 # SUBSTITUTE VALUES IN TEMPLATE
@@ -180,5 +181,4 @@ echo $template >> $jsonfile
 echo "Saved JSON description to $jsonfile"
 
 # SUBMIT TO AGAVE 
-#curl -sk -H "Authorization: Bearer $token" -X POST -F "fileToUpload=@$jsonfile" 'https://agave.iplantc.org/systems/v2/?pretty=true'
 systems-addupdate -z $token -F $jsonfile
