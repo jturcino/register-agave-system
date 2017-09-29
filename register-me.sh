@@ -1,10 +1,6 @@
 #!/usr/bin/env bash
 
-# FUNCTIONS
-function refresh_token() {
-    local newtoken=`echo $(auth-tokens-refresh -S) | rev | cut -d ' ' -f 1 | rev`
-    echo "$newtoken"
-}
+source functions.sh
 
 # DEFAULTS
 execution_template="execution-template.json"
@@ -95,90 +91,51 @@ if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
 fi
 
 # GET DEFAULTS IF NECESSARY
-# token is saved access token
-if [ -z "$token" ]; then
-    token=$(refresh_token)
-fi
-echo "Using access token $token"
+token="$(get_token $token)"
+echo "Access token: $token"
 
-# username is current user
-if [ -z "$username" ]; then
-    username=`whoami`
-fi
-echo "Setting owner as $username"
+username="$(get_username $username)"
+echo "Owner: $username"
 
-# host is base hostname
-if [ -z "$host" ]; then
-    host=`hostname -d`
-fi
-echo "Setting host to $host"
+host="$(get_host $host)"
+echo "Host: $host"
 
-# build sysid from username and host
-if [ -z "$sysid" ]; then
-    sysid=`echo $username-$host | tr '.' '-'`
-fi
-echo "Setting system ID to $sysid"
+sysid="$(get_sysid $sysid $username $host)"
+echo "System ID: $sysid"
 
-# default workdir is homedir
-if [ -z "$workdir" ]; then
-    workdir=`echo $HOME`
-fi
-echo "Setting $sysid work directory to $workdir"
+workdir="$(get_workdir $workdir)"
+echo "Work directory: $workdir"
 
-# calculate processors based on system type
-if [ "$(uname)" == "Linux" ]; then
-    if [ $(type -t lscpu) ]; then
-        processors=`lscpu -p | grep -v "^#" | sort -u -n -t, -k 2,4 | wc -l`
-    else
-        processors=`getconf _NPROCESSORS_ONLN`
-    fi
-elif [ "$(uname)" == "FreeBSD" ]; then
-    if [ $(type -t lscpu) ]; then
-        processors=`lscpu -p | grep -v "^#" | sort -u -n -t, -k 2,4 | wc -l`
-    else
-        processors=`getconf NPROCESSORS_ONLN`
-    fi
-elif [ "$(uname)" == "Darwin" ]; then
-    processors=`sysctl -n hw.physicalcpu_max`
-else
-    echo "Current system not a recognized type; please provide processors (-p) at the command line"
-    exit 0
-fi
-echo "Setting processor count to $processors"
+processors="$(get_processors)"
+echo "Processors: $processors"
 
-# get or make sshkeys
+# get/make sshkeys if not provided
 if [ -z "$privkey" ] || [ -z "$pubkey" ]; then
-    sshkeyfile="$HOME/.ssh/agave_$(echo $sysid | tr '-' '_')"
-    if ! [ -e "$sshkeyfile" ] || ! [ -e "$sshkeyfile.pub" ]; then
-        echo "Generating sshkeys for $sysid"
-        ssh-keygen -q -f $sshkeyfile -N ""
-    else
-        echo "Fetching existing sshkeys for $sysid"
-    fi
-    privkey="$(cat $sshkeyfile | awk '{printf "%s\\n", $0}')"
-    pubkey=`cat ${sshkeyfile}.pub`
-    cat ${sshkeyfile}.pub >> $HOME/.ssh/authorized_keys
+    echo "SSH keys not provided; generating..."
+    privkey="$(get_privkey $sysid)"
+    pubkey="$(get_pubkey $sysid)"
 fi
+echo "Set sshkeys"
+
+# set template, keys, and variables lists
+template=`cat $execution_template`
+keys="MAX_SYS_JOBS PORT MAX_USER_SYS_JOBS EXECUTION_TYPE USERNAME HOST SYSID PROCESSORS WORK PUBKEY PRIVKEY"
+variables="max_sys_jobs port max_user_sys_jobs execution_type username host sysid processors workdir pubkey privkey"
 
 # SUBSTITUTE VALUES IN TEMPLATE
 echo "Substituting values from template"
-template=`cat $execution_template`
-template=`echo ${template//\{USERNAME\}/$username}`
-template=`echo ${template//\{HOST\}/$host}`
-template=`echo ${template//\{SYSID\}/$sysid}`
-template=`echo ${template//\{PROCESSORS\}/$processors}`
-template=`echo ${template//\{WORK\}/$workdir}`
-template=`echo ${template//\{PUBKEY\}/$pubkey}`
-template=`echo ${template//\{PRIVKEY\}/$privkey}`
-template=`echo ${template//\{MAX_SYS_JOBS\}/$max_sys_jobs}`
-template=`echo ${template//\{PORT\}/$port}`
-template=`echo ${template//\{MAX_USER_SYS_JOBS\}/$max_user_sys_jobs}`
-template=`echo ${template//\{EXECUTION_TYPE\}/$execution_type}`
+num_subs=$(echo $keys | wc -w)
+for i in $(seq 1 $num_subs); do
+    key="\{$(get_list_item "$keys" $i)\}"
+    var="$(get_list_item "$variables" $i)"
+    var_value="${!var}"
+    template="$(substitute "$template" "$key" "$var_value")"
+done
 
 # SAVE TEMPLATE IN HOME DIR
 jsonfile="$savedir/$sysid.json"
-echo $template >> $jsonfile
+format_json "$template" "$jsonfile"
 echo "Saved JSON description to $jsonfile"
 
 # SUBMIT TO AGAVE 
-systems-addupdate -z $token -F $jsonfile
+#systems-addupdate -z $token -F $jsonfile
