@@ -33,22 +33,13 @@ function get_host() {
 
 # SYSID
 function get_sysid() {
-    local sysid="$1"
-    local username="$2"
-    local host="$3"
+    local username="$1"
+    local host="$2"
+    local sysid="$3"
     if [ -z "$sysid" ]; then
         sysid="$(echo ${username}-${host} | tr '.' '-')"
     fi
     echo $sysid
-}
-
-# WORKDIR
-function get_workdir() {
-    local workdir="$1"
-    if [ -z "$workdir" ]; then
-        workdir="$HOME"
-    fi
-    echo "$workdir"
 }
 
 # PROCESSORS
@@ -125,7 +116,7 @@ function format_json() {
         local last2chars="${i: -2}"
         if [[ "$lastchar" =~ [\{\[] ]]; then
             echo "${sbuffer}$i" | sed 's/ //' >> $file
-            indent="$indent  "
+            indent="$indent    "
             sbuffer="$indent"
         elif [ "$lastchar" == "," ] && ! [ "$last2chars" == "}," ] && ! [ "$last2chars" == "]," ]; then
             sbuffer="${sbuffer} $i"
@@ -135,7 +126,7 @@ function format_json() {
             if ! [ -z "${sbuffer// }" ]; then
                 echo "$sbuffer" | sed 's/ //' >> $file
             fi
-            indent="${indent%  }"
+            indent="${indent%    }"
             echo "${indent}$i" >> $file
             sbuffer="$indent"
         else

@@ -1,0 +1,22 @@
+{
+    "id": "{SYSID}",
+    "name": "{SYSID} Storage",
+    "status":"UP",
+    "type":"STORAGE",
+    "description": "{USERNAME}'s storage system on {HOST}",
+    "site": "{HOST}",
+    "default":false,
+    "storage": {
+        "host": "{HOST}",
+        "port": {PORT},
+        "protocol": "SFTP",
+        "rootDir": "/",
+        "homeDir": "{WORKDIR}",
+        "auth": {
+            "type": "SSHKEYS",
+            "username":"{USERNAME}",
+            "publicKey":"{PUBKEY}",
+            "privateKey": "{PRIVKEY}"
+        }
+     }
+}

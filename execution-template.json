@@ -7,7 +7,7 @@
   "site": "{HOST}",
   "default": false,
   "maxSystemJobs": {MAX_SYS_JOBS},
-  "workDir": "{WORK}",
+  "workDir": "{WORKDIR}",
   "scratchDir": "",
   "login": {
     "port": {PORT},
@@ -49,7 +49,7 @@
   "storage": {
     "mirror": false,
     "port": {PORT},
-    "homeDir": "{WORK}",
+    "homeDir": "{WORKDIR}",
     "protocol": "SFTP",
     "host": "{HOST}",
     "proxy": null,
